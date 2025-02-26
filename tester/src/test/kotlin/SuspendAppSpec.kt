@@ -1,3 +1,4 @@
+import io.kotest.assertions.fail
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.datatest.withData
 import io.kotest.inspectors.shouldForOne
@@ -39,6 +40,8 @@ suspend fun Runner.execute(
     val process = prepareProcess(mode)
         .start()
 
+    println("Started: ${process.info()} ($mode)")
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val outputChannel = produce {
         launch { process.inputReader().useLines { lines -> lines.forEach { send(OutputLine(it, "stdout")) } } }
@@ -55,6 +58,7 @@ suspend fun Runner.execute(
     if (!process.waitFor(timeout.inWholeMilliseconds, TimeUnit.MILLISECONDS)) {
         process.destroyForcibly()
         process.waitFor()
+        fail("process didn't finish")
     }
     interaction.cancel()
 
