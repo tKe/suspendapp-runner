@@ -7,8 +7,8 @@ repositories {
 }
 
 dependencies {
-    testImplementation("io.kotest:kotest-runner-junit5:+")
-    testImplementation("io.kotest:kotest-assertions-core:+")
+    testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.kotest.assertions.core)
 }
 
 tasks.test {

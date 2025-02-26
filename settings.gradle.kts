@@ -28,5 +28,3 @@ dependencyResolutionManagement {
 include(":common")
 include(":jvm")
 include(":tester")
-
-// includeBuild("../../dev/tke/arrow")

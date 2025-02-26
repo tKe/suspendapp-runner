@@ -1,12 +1,11 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.shadow)
     application
-    id("com.gradleup.shadow") version "9.0.0-beta9"
 }
 
 dependencies {
     implementation(projects.common)
-    implementation("io.arrow-kt:suspendapp:0.4.0")
 }
 
 application {
