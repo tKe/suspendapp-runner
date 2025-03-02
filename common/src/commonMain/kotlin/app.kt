@@ -14,7 +14,7 @@ data object Wait : Mode, Work by Work({ while(isActive) { delay(1000) }  })
 data object Fail : Mode, Work by Work({ error("BOOM!") })
 data object ChildFail : Mode, Work by Work({ launch { error("boom.") } })
 
-fun app(mode: String) = app(when(mode) {
+fun app(mode: String?) = app(when(mode) {
     "delay" -> Delay()
     "wait" -> Wait
     "fail" -> Fail

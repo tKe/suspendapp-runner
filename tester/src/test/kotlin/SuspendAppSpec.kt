@@ -20,7 +20,7 @@ import kotlin.time.Duration.Companion.seconds
 
 enum class Runner(val prepareProcess: (mode: String) -> ProcessBuilder) {
     JVM({ ProcessBuilder("java", "-jar", "../jvm/build/libs/jvm-all.jar", it) }),
-    MACOS({ ProcessBuilder("../common/build/bin/macosArm64/releaseExecutable/common.kexe", it) }),
+    NATIVE({ ProcessBuilder("../common/build/bin/macosX64/releaseExecutable/common.kexe", it) }),
     JS({
         ProcessBuilder(
             "node",

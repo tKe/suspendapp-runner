@@ -13,9 +13,9 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(kotlin("stdlib"))
-                implementation(libs.arrow.fx)
-                implementation(libs.arrow.suspendapp)
+                api(kotlin("stdlib"))
+                api(libs.arrow.fx)
+                api(libs.arrow.suspendapp)
             }
         }
     }
