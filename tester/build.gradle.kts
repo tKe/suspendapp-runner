@@ -33,7 +33,7 @@ val jsRunTasks = provider {
 
 tasks.register<Task>("prepareExecutables") {
     dependsOn(":jvm:shadowJar")
-    dependsOn(jsRunTasks.map { it.map { it.compilation.compileTaskProvider.get() } })
+    jsRunTasks.get().forEach { dependsOn(it.taskDependencies) }
     nativeExecutableCompileTask?.also { dependsOn(it) }
 }
 
@@ -51,4 +51,5 @@ tasks.test {
         "kotest.framework.config.fqn" to "KotestConfig",
     )
     useJUnitPlatform()
+    outputs.upToDateWhen { false }
 }
