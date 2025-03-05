@@ -14,42 +14,34 @@ dependencies {
     testImplementation(libs.kotest.assertions.core)
 }
 
-private val nativeExecutableCompileTask = with(DefaultNativePlatform.host()) {
-    when {
-        operatingSystem.isMacOsX && architecture.isArm64 -> ":common:linkReleaseExecutableMacosArm64"
-        operatingSystem.isMacOsX && architecture.isAmd64 -> ":common:linkReleaseExecutableMacosX64"
-        operatingSystem.isLinux && architecture.isArm64 -> ":common:linkReleaseExecutableLinuxArm64"
-        operatingSystem.isLinux && architecture.isAmd64 -> ":common:linkReleaseExecutableLinuxX64"
-        else -> null
-    }
-}
-
-val jsRunTasks = provider {
-    rootProject.project(":common").tasks
-        .filter { it.name.endsWith("NodeRun") }
-        .filterIsInstance<NodeJsExec>()
-        .filter { it.enabled }
-}
+val commonTasks = rootProject.project(":common").tasks
+val jvmTask = commonTasks.named<Jar>("shadowJar")
+val nonJvmTasks = commonTasks.withType<AbstractExecTask<*>>()
+    .matching { it.enabled && (it.name.startsWith("runReleaseExecutable") || it.name.endsWith("NodeRun")) }
 
 tasks.register<Task>("prepareExecutables") {
-    dependsOn(":jvm:shadowJar")
-    jsRunTasks.get().forEach { dependsOn(it.taskDependencies) }
-    nativeExecutableCompileTask?.also { dependsOn(it) }
+    dependsOn(jvmTask)
+    nonJvmTasks.all { this@register.dependsOn(taskDependencies) }
 }
 
 tasks.test {
     dependsOn("prepareExecutables")
-    jsRunTasks.get().forEach {
+    systemProperty("jvmJar", jvmTask.map { it.outputs.files.singleFile.absolutePath }.get())
+    nonJvmTasks.all {
+        val name = name
         systemProperties(
-            "${it.name}.executable" to it.executable,
-            "${it.name}.entrypoint" to it.inputFileProperty.get().asFile.absolutePath,
-            "${it.name}.workdir" to it.workingDir.absolutePath,
+            "${name}.executable" to executable,
+            "${name}.workdir" to workingDir.absolutePath,
         )
+        if(this is NodeJsExec) {
+            systemProperties("${name}.entrypoint" to inputFileProperty.map { it.asFile.absolutePath }.get())
+        }
     }
     systemProperties(
         "kotest.framework.classpath.scanning.config.disable" to "true",
         "kotest.framework.config.fqn" to "KotestConfig",
     )
+    systemProperties.onEach(::println)
     useJUnitPlatform()
     outputs.upToDateWhen { false }
 }

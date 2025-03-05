@@ -9,35 +9,27 @@ import kotlin.io.path.exists
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
 
-@EnabledIf(HasNativeBinary::class)
+@EnabledIf(NativeEntrypointConfig::class)
 class NativeSpec : FreeSpec(), ProcessProvider {
+    val config = NativeEntrypointConfig()
     init {
         include(suspendAppTests(this))
     }
 
     override fun prepareProcess(mode: String) =
-        ProcessBuilder(nativeBinary!!.pathString, mode)
+        ProcessBuilder(config.executable!!.pathString, mode)
+            .directory(config.workdir?.toFile())
 }
 
-class HasNativeBinary : EnabledCondition {
-    override fun enabled(kclass: KClass<out Spec>) =
-        nativeBinary?.exists() == true
-}
+class NativeEntrypointConfig() : EnabledCondition {
+    val name = System.getProperties().stringPropertyNames()
+        .first { it.startsWith("runReleaseExecutable") && it.endsWith(".executable") }
+        .substringBeforeLast('.')
+    val executable = System.getProperty("$name.executable")?.let(::Path)
+    val workdir = System.getProperty("$name.workdir")?.let(::Path)
 
-private val nativeTarget = run {
-    when (Platform.getOSType()) {
-        Platform.MAC -> when (Platform.ARCH) {
-            "aarch64" -> "macosArm64"
-            "x86-64" -> "macosX64"
-            else -> null
-        }
-        Platform.LINUX -> when (Platform.ARCH) { // untested
-            "aarch64" -> "linuxArm64"
-            "x86-64" -> "linuxX64"
-            else -> null
-        }
-        else -> null
+    override fun enabled(kclass: KClass<out Spec>): Boolean {
+        return (executable?.exists() ?: false)
+            && (workdir?.exists() ?: false)
     }
 }
-
-private val nativeBinary = nativeTarget?.let { Path("../common/build/bin/$it/releaseExecutable/common.kexe").absolute() }

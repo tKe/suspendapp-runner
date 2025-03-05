@@ -19,5 +19,5 @@ dependencyResolutionManagement {
 }
 
 include(":common")
-include(":jvm")
 include(":tester")
+

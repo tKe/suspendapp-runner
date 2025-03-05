@@ -1,8 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.shadow)
 }
 
 kotlin {
@@ -29,5 +30,11 @@ kotlin {
                 api(libs.arrow.suspendapp)
             }
         }
+    }
+}
+
+tasks.named<ShadowJar>("shadowJar") {
+    manifest {
+        attributes("Main-Class" to "MainKt")
     }
 }

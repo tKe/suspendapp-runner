@@ -6,5 +6,5 @@ class JvmSpec : FreeSpec(), ProcessProvider {
     }
 
     override fun prepareProcess(mode: String) =
-        ProcessBuilder("java", "-jar", "../jvm/build/libs/jvm-all.jar", mode)
+        ProcessBuilder("java", "-jar", System.getProperty("jvmJar"), mode)
 }
